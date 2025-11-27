@@ -33,7 +33,7 @@ export default function ReviewInterface() {
                         <span>Save Draft</span>
                     </button>
                     <button
-                        onClick={() => router.push('/customize')}
+                        onClick={() => router.push('/select-units')}
                         className="bg-primary-DEFAULT hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors shadow-lg shadow-blue-900/20"
                     >
                         <span>Approve & Continue</span>

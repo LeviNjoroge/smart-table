@@ -47,7 +47,7 @@ export default function FileUpload() {
                 if (data.confidence < 0.9) {
                     router.push('/review');
                 } else {
-                    router.push('/customize');
+                    router.push('/select-units');
                 }
             }, 500);
         } catch (error) {
