@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Upload, FileText, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTimetableStore } from "@/store/timetableStore";
-import { parseTimetableMock } from "@/lib/parsing/mock-parser";
+import { parseTimetable } from "@/lib/parsing/unified-parser";
 
 export default function FileUpload() {
     const [file, setFile] = useState<File | null>(null);
@@ -33,7 +33,7 @@ export default function FileUpload() {
                 setProgress(70);
             }, 2000);
 
-            const data = await parseTimetableMock(file);
+            const data = await parseTimetable(file);
 
             setStatus("Finalizing...");
             setProgress(90);
@@ -43,12 +43,8 @@ export default function FileUpload() {
                 setStatus("Done!");
                 setTimetable(data);
 
-                // Navigate based on confidence
-                if (data.confidence < 0.9) {
-                    router.push('/review');
-                } else {
-                    router.push('/select-units');
-                }
+                // Always navigate to unit selection
+                router.push('/select-units');
             }, 500);
         } catch (error) {
             setStatus("Error parsing file");

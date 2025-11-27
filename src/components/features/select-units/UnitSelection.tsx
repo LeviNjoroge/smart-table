@@ -3,111 +3,114 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Check, ChevronRight } from "lucide-react";
+import { ChevronRight, Plus, X } from "lucide-react";
 import { useTimetableStore } from "@/store/timetableStore";
 
 export default function UnitSelection() {
     const router = useRouter();
     const { originalTimetable, filterTimetable } = useTimetableStore();
-    const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
+    const [unitCodes, setUnitCodes] = useState<string[]>([""]);
 
     useEffect(() => {
         if (!originalTimetable) {
             router.push("/upload");
-            return;
         }
-
-        // Extract unique units from the original timetable
-        const uniqueUnits = Array.from(new Set(originalTimetable.sessions.map(s => s.unit_code)));
-        setSelectedUnits(uniqueUnits);
     }, [originalTimetable, router]);
 
-    const toggleUnit = (unitCode: string) => {
-        setSelectedUnits(prev =>
-            prev.includes(unitCode)
-                ? prev.filter(code => code !== unitCode)
-                : [...prev, unitCode]
-        );
+    const handleAddUnit = () => {
+        setUnitCodes([...unitCodes, ""]);
+    };
+
+    const handleRemoveUnit = (index: number) => {
+        if (unitCodes.length > 1) {
+            setUnitCodes(unitCodes.filter((_, i) => i !== index));
+        }
+    };
+
+    const handleUnitChange = (index: number, value: string) => {
+        const newUnits = [...unitCodes];
+        newUnits[index] = value.toUpperCase();
+        setUnitCodes(newUnits);
     };
 
     const handleContinue = () => {
-        filterTimetable(selectedUnits);
-        router.push("/customize");
+        // Filter out empty strings and trim whitespace
+        const validUnits = unitCodes
+            .map(code => code.trim())
+            .filter(code => code !== "");
+
+        if (validUnits.length === 0) {
+            return;
+        }
+
+        filterTimetable(validUnits);
+        router.push("/review");
     };
 
     if (!originalTimetable) return null;
 
-    // Group sessions by unit code to get details
-    const units = Array.from(new Set(originalTimetable.sessions.map(s => s.unit_code))).map(code => {
-        const session = originalTimetable.sessions.find(s => s.unit_code === code);
-        return {
-            code,
-            name: session?.unit_name || "Unknown Unit",
-            lecturer: session?.lecturer || "Unknown Lecturer"
-        };
-    });
+    const hasValidUnits = unitCodes.some(code => code.trim() !== "");
 
     return (
-        <div className="w-full max-w-4xl mx-auto p-6">
+        <div className="w-full max-w-3xl mx-auto p-6">
             <div className="text-center mb-12">
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                    Select Your Units
+                    Enter Your Unit Codes
                 </h1>
                 <p className="text-lg text-gray-400">
-                    Uncheck the units you don't want to include in your timetable.
+                    Type the unit codes for the classes you're taking this semester.
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                {units.map((unit) => (
+            <div className="space-y-4 mb-8">
+                {unitCodes.map((code, index) => (
                     <motion.div
-                        key={unit.code}
+                        key={index}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`
-                            relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200
-                            ${selectedUnits.includes(unit.code)
-                                ? "bg-primary-purple/10 border-primary-purple"
-                                : "bg-slate-800/50 border-slate-700 hover:border-slate-600"}
-                        `}
-                        onClick={() => toggleUnit(unit.code)}
+                        className="flex items-center space-x-3"
                     >
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <h3 className="text-lg font-semibold text-white mb-1">
-                                    {unit.code}
-                                </h3>
-                                <p className="text-gray-300 text-sm mb-1">{unit.name}</p>
-                                <p className="text-gray-500 text-xs">{unit.lecturer}</p>
-                            </div>
-
-                            <div className={`
-                                w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
-                                ${selectedUnits.includes(unit.code)
-                                    ? "bg-primary-purple border-primary-purple"
-                                    : "border-gray-500"}
-                            `}>
-                                {selectedUnits.includes(unit.code) && (
-                                    <Check className="w-4 h-4 text-white" />
-                                )}
-                            </div>
+                        <div className="flex-1 relative">
+                            <input
+                                type="text"
+                                value={code}
+                                onChange={(e) => handleUnitChange(index, e.target.value)}
+                                placeholder={`e.g., SOEN ${200 + index}`}
+                                className="w-full px-4 py-3 bg-slate-800 border-2 border-slate-700 rounded-xl text-white placeholder-gray-500 focus:border-primary-purple focus:outline-none transition-colors text-lg"
+                            />
                         </div>
+                        {unitCodes.length > 1 && (
+                            <button
+                                onClick={() => handleRemoveUnit(index)}
+                                className="p-3 bg-slate-800 hover:bg-red-500/10 border-2 border-slate-700 hover:border-red-500/50 rounded-xl transition-all"
+                            >
+                                <X className="w-5 h-5 text-gray-400 hover:text-red-400" />
+                            </button>
+                        )}
                     </motion.div>
                 ))}
+
+                <button
+                    onClick={handleAddUnit}
+                    className="w-full p-3 bg-slate-800/50 border-2 border-dashed border-slate-700 hover:border-primary-purple/50 rounded-xl text-gray-400 hover:text-primary-purple transition-all flex items-center justify-center space-x-2"
+                >
+                    <Plus className="w-5 h-5" />
+                    <span>Add Another Unit</span>
+                </button>
             </div>
 
             <div className="flex justify-center">
                 <button
                     onClick={handleContinue}
-                    disabled={selectedUnits.length === 0}
+                    disabled={!hasValidUnits}
                     className={`
                         flex items-center space-x-2 px-8 py-4 rounded-full font-semibold text-lg transition-all
-                        ${selectedUnits.length > 0
+                        ${hasValidUnits
                             ? "bg-gradient-to-r from-primary-purple to-secondary-teal text-white hover:shadow-lg hover:shadow-primary-purple/25 hover:scale-105"
                             : "bg-slate-700 text-gray-400 cursor-not-allowed"}
                     `}
                 >
-                    <span>Continue to Customize</span>
+                    <span>Continue to Review</span>
                     <ChevronRight className="w-5 h-5" />
                 </button>
             </div>
