@@ -52,14 +52,23 @@ export default function UnitSelection() {
     const hasValidUnits = unitCodes.some(code => code.trim() !== "");
 
     return (
-        <div className="w-full max-w-3xl mx-auto p-6">
+        <div className="w-full max-w-3xl mx-auto p-6 animate-fade-in">
             <div className="text-center mb-12">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                <motion.h1
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-4xl md:text-5xl font-bold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300"
+                >
                     Enter Your Unit Codes
-                </h1>
-                <p className="text-lg text-gray-400">
-                    Type the unit codes for the classes you're taking this semester.
-                </p>
+                </motion.h1>
+                <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-lg text-gray-300"
+                >
+                    Type the unit codes for the classes you're taking this semester
+                </motion.p>
             </div>
 
             <div className="space-y-4 mb-8">
@@ -76,43 +85,48 @@ export default function UnitSelection() {
                                 value={code}
                                 onChange={(e) => handleUnitChange(index, e.target.value)}
                                 placeholder={`e.g., SOEN ${200 + index}`}
-                                className="w-full px-4 py-3 bg-slate-800 border-2 border-slate-700 rounded-xl text-white placeholder-gray-500 focus:border-primary-purple focus:outline-none transition-colors text-lg"
+                                className="w-full px-5 py-4 glass-dark border-2 border-white/10 rounded-2xl text-white placeholder-gray-400 focus:border-primary-purple focus:outline-none transition-all duration-300 text-lg font-medium hover:border-white/20"
                             />
                         </div>
                         {unitCodes.length > 1 && (
-                            <button
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                                 onClick={() => handleRemoveUnit(index)}
-                                className="p-3 bg-slate-800 hover:bg-red-500/10 border-2 border-slate-700 hover:border-red-500/50 rounded-xl transition-all"
+                                className="p-4 glass-dark hover:!bg-red-500/20 border-2 border-white/10 hover:border-red-500/50 rounded-2xl transition-all duration-300"
                             >
-                                <X className="w-5 h-5 text-gray-400 hover:text-red-400" />
-                            </button>
+                                <X className="w-5 h-5 text-gray-300 hover:text-red-400" />
+                            </motion.button>
                         )}
                     </motion.div>
                 ))}
 
-                <button
+                <motion.button
+                    whileHover={{ scale: 1.02 }}
                     onClick={handleAddUnit}
-                    className="w-full p-3 bg-slate-800/50 border-2 border-dashed border-slate-700 hover:border-primary-purple/50 rounded-xl text-gray-400 hover:text-primary-purple transition-all flex items-center justify-center space-x-2"
+                    className="w-full p-4 glass border-2 border-dashed border-white/20 hover:border-primary-purple/50 rounded-2xl text-gray-300 hover:text-white transition-all duration-300 flex items-center justify-center space-x-2 font-medium"
                 >
                     <Plus className="w-5 h-5" />
                     <span>Add Another Unit</span>
-                </button>
+                </motion.button>
             </div>
 
             <div className="flex justify-center">
-                <button
+                <motion.button
+                    whileHover={hasValidUnits ? { scale: 1.05, boxShadow: "0 20px 60px rgba(168, 85, 247, 0.4)" } : {}}
+                    whileTap={hasValidUnits ? { scale: 0.98 } : {}}
                     onClick={handleContinue}
                     disabled={!hasValidUnits}
                     className={`
-                        flex items-center space-x-2 px-8 py-4 rounded-full font-semibold text-lg transition-all
+                        flex items-center space-x-3 px-10 py-5 rounded-full font-bold text-lg transition-all duration-300
                         ${hasValidUnits
-                            ? "bg-gradient-to-r from-primary-purple to-secondary-teal text-white hover:shadow-lg hover:shadow-primary-purple/25 hover:scale-105"
-                            : "bg-slate-700 text-gray-400 cursor-not-allowed"}
+                            ? "gradient-apple text-white shadow-2xl shadow-primary-purple/50"
+                            : "glass-dark text-gray-400 cursor-not-allowed border-2 border-white/10"}
                     `}
                 >
                     <span>Continue to Review</span>
-                    <ChevronRight className="w-5 h-5" />
-                </button>
+                    <ChevronRight className="w-6 h-6" />
+                </motion.button>
             </div>
         </div>
     );
